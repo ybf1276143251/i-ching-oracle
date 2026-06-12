@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -219,13 +219,34 @@ const I18nContext = createContext<I18nContextType>({
   toggleLang: () => {},
 });
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>("zh");
+function getInitialLang(): Lang {
+  if (typeof window === "undefined") return "zh";
+  try {
+    const stored = localStorage.getItem("i18n-lang");
+    if (stored === "en" || stored === "zh") return stored;
+  } catch {}
+  return "zh";
+}
 
-  const toggleLang = () => setLang((prev) => (prev === "zh" ? "en" : "zh"));
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLang] = useState<Lang>(getInitialLang);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  const toggleLang = () => {
+    setLang((prev) => {
+      const next = prev === "zh" ? "en" : "zh";
+      try { localStorage.setItem("i18n-lang", next); } catch {}
+      return next;
+    });
+  };
+
+  // Avoid hydration mismatch — render zh on server, then switch on client
+  const displayLang = mounted ? lang : "zh";
 
   return (
-    <I18nContext.Provider value={{ lang, t: lang === "zh" ? zh : en, toggleLang }}>
+    <I18nContext.Provider value={{ lang: displayLang, t: displayLang === "zh" ? zh : en, toggleLang }}>
       {children}
     </I18nContext.Provider>
   );
