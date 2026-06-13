@@ -15,7 +15,7 @@ export default function PremiumModal({ open, onClose }: PremiumModalProps) {
       <div className="relative glass max-w-md w-full animate-fadeUp z-10" onClick={e => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text)] text-xl">✕</button>
         <div className="text-center mb-6">
-          <span className="text-5xl block mb-3">⭐</span>
+          <span className="text-5xl block mb-3 text-gradient">☰</span>
           <h2 className="text-2xl font-bold text-gradient">{lang === "en" ? "Upgrade to Pro" : "升级 Pro"}</h2>
         </div>
         <div className="space-y-2 mb-6 text-sm">

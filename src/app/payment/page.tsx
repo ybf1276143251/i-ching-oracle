@@ -11,7 +11,7 @@ export default function PaymentPage() {
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-lg mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass glass-glow p-8 md:p-10 text-center">
-          <p className="text-5xl mb-4">⭐</p>
+          <p className="text-5xl mb-4 text-gradient">☰</p>
           <h1 className="text-3xl font-bold text-gradient mb-3">
             {lang === "en" ? "Upgrade Your Experience" : "升级体验"}
           </h1>

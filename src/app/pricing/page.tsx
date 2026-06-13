@@ -18,6 +18,7 @@ export default function PricingPage() {
         <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
           {/* Free */}
           <div className="glass p-8 flex flex-col text-center">
+            <p className="text-4xl mb-2 opacity-40">☰</p>
             <h3 className="text-lg font-semibold mb-2">{t.freePlan}</h3>
             <p className="text-4xl font-bold mb-1">$0</p>
             <p className="text-sm text-[var(--text-muted)] mb-6">{lang === "en" ? "forever" : "永久"}</p>
@@ -31,6 +32,7 @@ export default function PricingPage() {
           {/* Pro */}
           <div className="glass glass-glow p-8 flex flex-col text-center relative">
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--gold)] text-[#0A0A0A] text-xs font-bold px-4 py-1 rounded-full">{t.popular}</span>
+            <p className="text-4xl mb-2 text-gradient">☰</p>
             <h3 className="text-lg font-semibold mb-2">Pro</h3>
             <p className="text-4xl font-bold mb-1">{lang === "en" ? "$0.9" : "¥0.9"}</p>
             <p className="text-sm text-[var(--text-muted)] mb-6">{lang === "en" ? "/month" : "/月"}</p>
@@ -45,6 +47,7 @@ export default function PricingPage() {
 
           {/* Lifetime */}
           <div className="glass p-8 flex flex-col text-center">
+            <p className="text-4xl mb-2 text-gradient">䷀</p>
             <h3 className="text-lg font-semibold mb-2">{t.lifetimePlan}</h3>
             <p className="text-4xl font-bold mb-1">{lang === "en" ? "$9.9" : "¥9.9"}</p>
             <p className="text-sm text-[var(--text-muted)] mb-6">{t.oneTime}</p>

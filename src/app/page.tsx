@@ -11,12 +11,12 @@ const fadeInView = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0,
 
 // Divination methods
 const methods = [
-  { key: "coins", icon: "🪙", titleEn: "Coin Divination", titleZh: "金钱卦", descEn: "Three coins, six throws. The most popular I Ching method.", descZh: "三枚铜钱，投掷六次。最流行的易经占卜法。", href: "/read" },
-  { key: "yarrow", icon: "🌿", titleEn: "Yarrow Stalk", titleZh: "蓍草占卜", descEn: "50 yarrow stalks. The ancient traditional method.", descZh: "五十根蓍草。最古老的占卜方法。", href: "/read" },
-  { key: "hexagram", icon: "☯", titleEn: "64 Hexagrams", titleZh: "64卦占卜", descEn: "Browse all hexagrams and find your guidance.", descZh: "浏览全部六十四卦，找到你的指引。", href: "/seo" },
-  { key: "plum", icon: "🌸", titleEn: "Plum Blossom", titleZh: "梅花易数", descEn: "Based on time, date and numbers. Instant divination.", descZh: "以时间、日期、数字起卦。即时占卜。", href: "/read" },
-  { key: "kingwen", icon: "👑", titleEn: "King Wen Oracle", titleZh: "文王卦", descEn: "The classic King Wen interpretation method.", descZh: "周文王创立的经典解卦法。", href: "/read" },
-  { key: "numerology", icon: "🔢", titleEn: "Number Divination", titleZh: "数字卦", descEn: "Use meaningful numbers to generate your hexagram.", descZh: "用有意义的数字生成卦象。", href: "/read" },
+  { key: "coins", icon: "乾", titleEn: "Coin Divination", titleZh: "金钱卦", descEn: "Three coins, six throws. The most popular I Ching method.", descZh: "三枚铜钱，投掷六次。最流行的易经占卜法。", href: "/read" },
+  { key: "yarrow", icon: "筮", titleEn: "Yarrow Stalk", titleZh: "蓍草占卜", descEn: "50 yarrow stalks. The ancient traditional method.", descZh: "五十根蓍草。最古老的占卜方法。", href: "/read" },
+  { key: "hexagram", icon: "䷀", titleEn: "64 Hexagrams", titleZh: "64卦占卜", descEn: "Browse all hexagrams and find your guidance.", descZh: "浏览全部六十四卦，找到你的指引。", href: "/seo" },
+  { key: "plum", icon: "梅", titleEn: "Plum Blossom", titleZh: "梅花易数", descEn: "Based on time, date and numbers. Instant divination.", descZh: "以时间、日期、数字起卦。即时占卜。", href: "/read" },
+  { key: "kingwen", icon: "周", titleEn: "King Wen Oracle", titleZh: "文王卦", descEn: "The classic King Wen interpretation method.", descZh: "周文王创立的经典解卦法。", href: "/read" },
+  { key: "numerology", icon: "数", titleEn: "Number Divination", titleZh: "数字卦", descEn: "Use meaningful numbers to generate your hexagram.", descZh: "用有意义的数字生成卦象。", href: "/read" },
 ];
 
 export default function LandingPage() {
@@ -62,7 +62,7 @@ export default function LandingPage() {
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.5 } } }}
               >
                 <Link href={m.href} className="glass p-6 block group hover:border-[var(--border-hover)] transition-all duration-300 h-full">
-                  <p className="text-3xl mb-3">{m.icon}</p>
+                  <p className="text-5xl mb-3 font-serif text-gradient">{m.icon}</p>
                   <h3 className="text-base font-semibold text-[var(--text)] mb-1 group-hover:text-[var(--gold)] transition-colors">
                     {lang === "en" ? m.titleEn : m.titleZh}
                   </h3>
@@ -164,7 +164,7 @@ export default function LandingPage() {
               {lang === "en" ? "Thousands have found clarity through the I Ching." : "无数人通过易经找到了清晰的方向。"}
             </p>
             <Link href="/read" className="btn btn-primary text-xl px-16 py-6 rounded-2xl font-bold shadow-[0_0_60px_rgba(212,175,55,0.2)]">
-              🔮 {lang === "en" ? "Ask the Oracle" : "向易经提问"}
+              ䷀ {lang === "en" ? "Ask the Oracle" : "向易经提问"}
             </Link>
           </motion.div>
         </div>
