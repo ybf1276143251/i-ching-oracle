@@ -19,20 +19,22 @@ export default function PremiumModal({ open, onClose }: PremiumModalProps) {
           <h2 className="text-2xl font-bold text-gradient">{lang === "en" ? "Upgrade to Pro" : "升级 Pro"}</h2>
         </div>
         <div className="space-y-2 mb-6 text-sm">
-          {[lang === "en" ? "Unlimited readings" : "无限次占卜", lang === "en" ? "Priority AI interpretation" : "优先AI解读", lang === "en" ? "Advanced insights" : "高级洞察", lang === "en" ? "Ad-free experience" : "无广告体验"].map((f, i) => (
+          {[
+            lang === "en" ? "Unlimited readings" : "无限次占卜",
+            lang === "en" ? "Advanced AI interpretation" : "高级AI解读",
+            lang === "en" ? "Priority access" : "优先访问",
+            lang === "en" ? "Early access to new features" : "新功能抢先体验",
+          ].map((f, i) => (
             <div key={i} className="flex items-center gap-2"><span className="text-[var(--gold)]">✓</span><span>{f}</span></div>
           ))}
         </div>
         <div className="space-y-3">
-          <Link href="/payment?plan=pro" onClick={onClose} className="btn btn-primary w-full">
-            {lang === "en" ? "Pro · $0.9/mo" : "Pro · ¥0.9/月"}
-          </Link>
-          <Link href="/payment?plan=lifetime" onClick={onClose} className="btn btn-secondary w-full">
-            {lang === "en" ? "Max · $9.9 lifetime" : "Max · ¥9.9 终身"}
+          <Link href="/pricing" onClick={onClose} className="btn btn-primary w-full">
+            $4.99/mo · {lang === "en" ? "Join Pro Waitlist" : "加入 Pro 等待名单"}
           </Link>
         </div>
         <p className="text-xs text-[var(--text-muted)] text-center mt-4">
-          {lang === "en" ? "Pay once, activate via code." : "付款后获取激活码解锁。"}
+          {lang === "en" ? "PayPal and card payments coming soon." : "PayPal 和银行卡支付即将上线。"}
         </p>
       </div>
     </div>

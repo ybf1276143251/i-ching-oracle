@@ -44,6 +44,15 @@ CREATE TABLE IF NOT EXISTS public.activation_codes (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ─── Pro Waitlist ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.pro_waitlist (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL,
+  name TEXT,
+  country TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ─── Hexagram SEO pages ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hexagram_pages (
   id INTEGER PRIMARY KEY CHECK (id BETWEEN 1 AND 64),
@@ -102,6 +111,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.readings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activation_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hexagram_pages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pro_waitlist ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
@@ -113,3 +123,5 @@ CREATE POLICY "Users can update own readings" ON public.readings FOR UPDATE USIN
 CREATE POLICY "Anyone can read activation codes" ON public.activation_codes FOR SELECT USING (TRUE);
 
 CREATE POLICY "Public can read hexagram pages" ON public.hexagram_pages FOR SELECT USING (TRUE);
+
+CREATE POLICY "Anyone can join waitlist" ON public.pro_waitlist FOR INSERT WITH CHECK (TRUE);
