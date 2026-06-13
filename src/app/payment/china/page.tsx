@@ -1,15 +1,27 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
 function ChinaPaymentContent() {
   const { lang } = useI18n();
   const searchParams = useSearchParams();
   const [plan, setPlan] = useState<"pro" | "lifetime">((searchParams.get("plan") as "pro" | "lifetime") || "pro");
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) { setChecking(false); return; }
+    supabase.auth.getUser().then(({ data }) => {
+      setLoggedIn(!!data.user);
+      setChecking(false);
+    });
+  }, []);
   const [step, setStep] = useState<"pay" | "verifying" | "success" | "failed">("pay");
   const [activationCode, setActivationCode] = useState("");
   const [copied, setCopied] = useState(false);
@@ -41,6 +53,17 @@ function ChinaPaymentContent() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (checking) return <div className="min-h-screen pt-24 text-center text-[var(--text-muted)]">Loading...</div>;
+  if (!loggedIn) return (
+    <div className="min-h-screen pt-24 pb-16"><div className="max-w-md mx-auto px-6"><div className="glass p-8 text-center">
+      <p className="text-4xl mb-4">🔐</p>
+      <h2 className="text-xl font-bold text-gradient mb-3">{lang==="en"?"Sign in to continue":"请先登录"}</h2>
+      <p className="text-sm text-[var(--text-muted)] mb-6">{lang==="en"?"You need an account before making a payment. China users: phone number. International: email.":"支付前需要注册账号。国内用户用手机号，国际用户用邮箱。"}</p>
+      <Link href={`/auth?redirect=${encodeURIComponent(window.location.pathname+window.location.search)}`} className="btn btn-primary w-full mb-3">{lang==="en"?"Sign In / Register":"登录 / 注册"}</Link>
+      <Link href="/" className="btn btn-ghost btn-sm">← {lang==="en"?"Back":"返回"}</Link>
+    </div></div></div>
+  );
 
   return (
     <div className="min-h-screen pt-24 pb-16">
