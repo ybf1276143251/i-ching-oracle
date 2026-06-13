@@ -29,10 +29,10 @@ export default function InternationalPaymentPage() {
 
           <div className="space-y-2 mb-3">
             <Link href="/payment/china" className="btn btn-primary w-full">
-              💚 {lang === "en" ? "Pay with WeChat" : "微信支付"}
+              {lang === "en" ? "Pay with WeChat" : "微信支付"}
             </Link>
             <Link href="/payment/china" className="btn btn-secondary w-full">
-              💙 {lang === "en" ? "Pay with Alipay" : "支付宝支付"}
+              {lang === "en" ? "Pay with Alipay" : "支付宝支付"}
             </Link>
           </div>
 
