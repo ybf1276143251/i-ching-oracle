@@ -11,12 +11,12 @@ const fadeInView = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0,
 
 // Divination methods
 const methods = [
-  { key: "coins", icon: "乾", titleEn: "Coin Divination", titleZh: "金钱卦", descEn: "Three coins, six throws. The most popular I Ching method.", descZh: "三枚铜钱，投掷六次。最流行的易经占卜法。", href: "/read" },
-  { key: "yarrow", icon: "筮", titleEn: "Yarrow Stalk", titleZh: "蓍草占卜", descEn: "50 yarrow stalks. The ancient traditional method.", descZh: "五十根蓍草。最古老的占卜方法。", href: "/read" },
+  { key: "coins", icon: "乾", titleEn: "Coin Divination", titleZh: "金钱卦", descEn: "Three coins, six throws. The most popular I Ching method.", descZh: "三枚铜钱，投掷六次。最流行的易经占卜法。", href: "/read/coins" },
+  { key: "yarrow", icon: "筮", titleEn: "Yarrow Stalk", titleZh: "蓍草占卜", descEn: "50 yarrow stalks. The ancient traditional method.", descZh: "五十根蓍草。最古老的占卜方法。", href: "/read/yarrow" },
   { key: "hexagram", icon: "䷀", titleEn: "64 Hexagrams", titleZh: "64卦占卜", descEn: "Browse all hexagrams and find your guidance.", descZh: "浏览全部六十四卦，找到你的指引。", href: "/seo" },
-  { key: "plum", icon: "梅", titleEn: "Plum Blossom", titleZh: "梅花易数", descEn: "Based on time, date and numbers. Instant divination.", descZh: "以时间、日期、数字起卦。即时占卜。", href: "/read" },
-  { key: "kingwen", icon: "周", titleEn: "King Wen Oracle", titleZh: "文王卦", descEn: "The classic King Wen interpretation method.", descZh: "周文王创立的经典解卦法。", href: "/read" },
-  { key: "numerology", icon: "数", titleEn: "Number Divination", titleZh: "数字卦", descEn: "Use meaningful numbers to generate your hexagram.", descZh: "用有意义的数字生成卦象。", href: "/read" },
+  { key: "plum", icon: "梅", titleEn: "Plum Blossom", titleZh: "梅花易数", descEn: "Based on time, date and numbers. Instant divination.", descZh: "以时间、日期、数字起卦。即时占卜。", href: "/read/plum" },
+  { key: "kingwen", icon: "周", titleEn: "King Wen Oracle", titleZh: "文王卦", descEn: "The classic King Wen interpretation method.", descZh: "周文王创立的经典解卦法。", href: "/read/kingwen" },
+  { key: "numerology", icon: "数", titleEn: "Number Divination", titleZh: "数字卦", descEn: "Use meaningful numbers to generate your hexagram.", descZh: "用有意义的数字生成卦象。", href: "/read/numbers" },
 ];
 
 export default function LandingPage() {
@@ -134,12 +134,12 @@ export default function LandingPage() {
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: "01", icon: "✍️", title: lang === "en" ? "Ask" : "提问", desc: lang === "en" ? "Form your question with sincerity." : "以真诚提出你的问题。" },
-              { step: "02", icon: "☯", title: lang === "en" ? "Cast" : "起卦", desc: lang === "en" ? "I Ching responds through hexagrams." : "易经以卦象回应。" },
-              { step: "03", icon: "✨", title: lang === "en" ? "Receive" : "解读", desc: lang === "en" ? "AI interprets the ancient wisdom." : "AI解读千年智慧。" },
+              { step: "01", icon: "问", title: lang === "en" ? "Ask" : "提问", desc: lang === "en" ? "Form your question with sincerity." : "以真诚提出你的问题。" },
+              { step: "02", icon: "卦", title: lang === "en" ? "Cast" : "起卦", desc: lang === "en" ? "I Ching responds through hexagrams." : "易经以卦象回应。" },
+              { step: "03", icon: "释", title: lang === "en" ? "Receive" : "解读", desc: lang === "en" ? "AI interprets the ancient wisdom." : "AI解读千年智慧。" },
             ].map((item, i) => (
               <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { delay: i * 0.2 } } }} className="text-center">
-                <p className="text-5xl mb-4">{item.icon}</p>
+                <p className="text-5xl mb-4 font-serif text-gradient">{item.icon}</p>
                 <p className="text-xs text-[var(--gold)] tracking-widest mb-2">{item.step}</p>
                 <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
                 <p className="text-sm text-[var(--text-secondary)]">{item.desc}</p>
@@ -163,8 +163,8 @@ export default function LandingPage() {
             <p className="text-[var(--text-secondary)] text-lg mb-10">
               {lang === "en" ? "Thousands have found clarity through the I Ching." : "无数人通过易经找到了清晰的方向。"}
             </p>
-            <Link href="/read" className="btn btn-primary text-xl px-16 py-6 rounded-2xl font-bold shadow-[0_0_60px_rgba(212,175,55,0.2)]">
-              ䷀ {lang === "en" ? "Ask the Oracle" : "向易经提问"}
+            <Link href="/read/coins" className="btn btn-primary text-xl px-16 py-6 rounded-2xl font-bold shadow-[0_0_60px_rgba(212,175,55,0.2)]">
+              {lang === "en" ? "Ask the Oracle" : "向易经提问"}
             </Link>
           </motion.div>
         </div>
