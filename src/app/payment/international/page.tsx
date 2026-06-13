@@ -11,13 +11,9 @@ export default function InternationalPaymentPage() {
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-lg mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass glass-glow p-8 md:p-10 text-center">
-          <p className="text-3xl mb-3">🌍</p>
-          <h1 className="text-2xl font-bold text-gradient mb-2">Pro · $4.99/mo</h1>
-          <p className="text-[var(--text-muted)] text-sm mb-6">
-            {lang === "en"
-              ? "Pro access is currently available through our waitlist while we set up global payments."
-              : "全球支付系统准备中，Pro 权限目前通过等待名单开放。"}
-          </p>
+          <p className="text-4xl mb-3 text-gradient">☰</p>
+          <h1 className="text-2xl font-bold text-gradient mb-2">Pro</h1>
+          <p className="text-[var(--gold)] text-lg font-bold mb-4">$4.99/month</p>
 
           <div className="glass p-4 mb-6 text-left text-sm space-y-1.5">
             <p className="text-[var(--gold)] font-semibold text-center mb-2">Included</p>
@@ -36,16 +32,12 @@ export default function InternationalPaymentPage() {
             </Link>
           </div>
 
-          <Link href="/pricing" className="btn btn-primary w-full mb-3">
+          <Link href="/pricing" className="btn btn-secondary w-full mb-3">
             {lang === "en" ? "Join Pro Waitlist" : "加入 Pro 等待名单"}
           </Link>
-          <p className="text-xs text-[var(--text-muted)] mb-6">
+          <p className="text-xs text-[var(--text-muted)]">
             {lang === "en" ? "PayPal and card payments coming soon." : "PayPal 和银行卡支付即将上线。"}
           </p>
-
-          <Link href="/activate" className="btn btn-ghost btn-sm">
-            {lang === "en" ? "I have an activation code" : "我有激活码"}
-          </Link>
         </motion.div>
       </div>
     </div>
