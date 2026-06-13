@@ -30,8 +30,8 @@ export default function Footer() {
           <div>
             <p className="text-xs font-medium text-[var(--text)] mb-3 uppercase tracking-wider">Legal</p>
             <div className="space-y-2">
-              <span className="block text-xs text-[var(--text-muted)]">Privacy Policy</span>
-              <span className="block text-xs text-[var(--text-muted)]">Terms of Service</span>
+              <Link href="/privacy" className="block text-xs text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="block text-xs text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

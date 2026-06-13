@@ -90,7 +90,7 @@ export default function LandingPage() {
             {[
               { icon: "☯", title: lang === "en" ? "Yin & Yang" : "阴阳", desc: lang === "en" ? "The fundamental duality. Balance is the key." : "存在的基本二元性。平衡是关键。" },
               { icon: "☰", title: lang === "en" ? "The Trigrams" : "八卦", desc: lang === "en" ? "Eight symbols forming the 64 hexagrams." : "八个符号，组成六十四卦。" },
-              { icon: "🔮", title: lang === "en" ? "Personal Guidance" : "人生指引", desc: lang === "en" ? "Timeless wisdom for your specific situation." : "为你当下的处境提供永恒智慧。" },
+              { icon: "易", title: lang === "en" ? "Personal Guidance" : "人生指引", desc: lang === "en" ? "Timeless wisdom for your specific situation." : "为你当下的处境提供永恒智慧。" },
             ].map((item, i) => (
               <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { delay: i * 0.15, duration: 0.6 } } }} className="glass p-8 text-center group">
                 <p className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-500">{item.icon}</p>
