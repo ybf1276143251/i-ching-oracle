@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function InternationalPaymentPage() {
+function InternationalPaymentContent() {
   const { lang } = useI18n();
-  const [plan, setPlan] = useState<"pro" | "lifetime">("pro");
+  const searchParams = useSearchParams();
+  const [plan, setPlan] = useState<"pro" | "lifetime">((searchParams.get("plan") as "pro" | "lifetime") || "pro");
   const [step, setStep] = useState<"pay" | "verifying" | "success" | "failed">("pay");
   const [activationCode, setActivationCode] = useState("");
   const [copied, setCopied] = useState(false);
@@ -30,12 +32,18 @@ export default function InternationalPaymentPage() {
       <div className="max-w-lg mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass glass-glow p-8 md:p-10 text-center">
           <p className="text-3xl mb-3">🌍</p>
-          <h1 className="text-2xl font-bold text-gradient mb-2">{lang === "en" ? "International Payment" : "国际用户支付"}</h1>
+          <p className="text-4xl mb-3">{plan === "pro" ? "☰" : "䷀"}</p>
+          <h1 className="text-2xl font-bold text-gradient mb-2">
+            {plan === "pro" ? "Pro" : "Lifetime"}
+          </h1>
+          <p className="text-[var(--gold)] text-lg font-bold mb-4">
+            {plan === "pro" ? "$0.9/mo" : "$9.9 lifetime"}
+          </p>
 
           <div className="flex gap-2 justify-center mb-6">
             {(["pro", "lifetime"] as const).map(p => (
               <button key={p} onClick={() => { setPlan(p); setStep("pay"); }} className={`btn btn-sm ${plan === p ? "btn-primary" : "btn-ghost"} text-xs`}>
-                {p === "pro" ? "Pro" : "Lifetime"} · {p === "pro" ? "$0.9" : "$9.9"}
+                {p === "pro" ? "Pro" : "Lifetime"}
               </button>
             ))}
           </div>
@@ -98,4 +106,8 @@ export default function InternationalPaymentPage() {
       </div>
     </div>
   );
+}
+
+export default function InternationalPaymentPage() {
+  return <Suspense fallback={<div className="min-h-screen pt-24 text-center text-[var(--text-muted)]">Loading...</div>}><InternationalPaymentContent /></Suspense>;
 }

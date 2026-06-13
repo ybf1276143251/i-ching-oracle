@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function ChinaPaymentPage() {
+function ChinaPaymentContent() {
   const { lang } = useI18n();
-  const [plan, setPlan] = useState<"pro" | "lifetime">("pro");
+  const searchParams = useSearchParams();
+  const [plan, setPlan] = useState<"pro" | "lifetime">((searchParams.get("plan") as "pro" | "lifetime") || "pro");
   const [step, setStep] = useState<"pay" | "verifying" | "success" | "failed">("pay");
   const [activationCode, setActivationCode] = useState("");
   const [copied, setCopied] = useState(false);
@@ -44,10 +46,14 @@ export default function ChinaPaymentPage() {
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-lg mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass glass-glow p-8 md:p-10 text-center">
-          <p className="text-3xl mb-3">🇨🇳</p>
-          <h1 className="text-2xl font-bold text-gradient mb-2">{lang === "en" ? "China Payment" : "中国用户支付"}</h1>
+          <p className="text-4xl mb-3">{plan === "pro" ? "☰" : "䷀"}</p>
+          <h1 className="text-2xl font-bold text-gradient mb-2">
+            {plan === "pro" ? "Pro" : lang === "en" ? "Lifetime" : "终身"}
+          </h1>
+          <p className="text-[var(--gold)] text-lg font-bold mb-4">
+            {plan === "pro" ? (lang === "en" ? "$0.9/mo" : "¥0.9/月") : (lang === "en" ? "$9.9 lifetime" : "¥9.9 终身")}
+          </p>
 
-          {/* Plan selector */}
           <div className="flex gap-2 justify-center mb-6">
             {(["pro", "lifetime"] as const).map(p => (
               <button key={p} onClick={() => { setPlan(p); setStep("pay"); }}
@@ -135,4 +141,8 @@ export default function ChinaPaymentPage() {
       </div>
     </div>
   );
+}
+
+export default function ChinaPaymentPage() {
+  return <Suspense fallback={<div className="min-h-screen pt-24 text-center text-[var(--text-muted)]">Loading...</div>}><ChinaPaymentContent /></Suspense>;
 }

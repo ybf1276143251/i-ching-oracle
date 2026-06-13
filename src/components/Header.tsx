@@ -57,9 +57,13 @@ export default function Header() {
             <Link href="/auth" className="btn btn-ghost btn-sm text-xs">{t.login}</Link>
           )}
 
-          <Link href="/" className="btn btn-primary btn-sm text-xs hidden sm:inline-flex">
-            {t.startReading}
-          </Link>
+          <button
+            onClick={() => window.history.length > 1 ? window.history.back() : window.location.href = '/'}
+            className="btn btn-ghost btn-sm text-xs"
+            title={lang === "en" ? "Go back" : "返回"}
+          >
+            ← {lang === "en" ? "Back" : "返回"}
+          </button>
 
           <button className="md:hidden text-[var(--text)] text-xl ml-1" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? "✕" : "☰"}

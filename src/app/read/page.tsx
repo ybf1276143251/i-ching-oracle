@@ -49,7 +49,25 @@ export default function ReadPage() {
     fetch("/api/user").then(r => r.json()).then(d => {
       if (d.user) setIsPremium(d.user.is_premium || d.user.plan === "premium");
     }).catch(() => {});
+
+    // Restore saved reading from localStorage
+    try {
+      const saved = localStorage.getItem("iching-last-reading");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setResult(parsed.result);
+        setQuestion(parsed.question);
+        setFullText(parsed.fullText || "");
+      }
+    } catch {}
   }, []);
+
+  // Save reading to localStorage whenever result changes
+  useEffect(() => {
+    if (result) {
+      try { localStorage.setItem("iching-last-reading", JSON.stringify({ result, question, fullText })); } catch {}
+    }
+  }, [result, question, fullText]);
 
   const handleDivine = async () => {
     if (!question.trim()) { setError(lang === "en" ? "Please enter your question." : "请输入你的问题"); return; }
@@ -95,7 +113,7 @@ export default function ReadPage() {
             <span className="text-xs text-[var(--text-muted)]">{question.length}/500</span>
           </div>
           <button onClick={handleDivine} disabled={loading || !question.trim()} className="btn btn-primary w-full py-4 text-base font-semibold">
-            {loading ? <><span className="inline-block animate-spin text-xl">☯</span> {t.generating}</> : <>🔮 {t.generateReading}</>}
+            {loading ? <><span className="inline-block animate-spin text-xl">☯</span> {t.generating}</> : <>䷀ {t.generateReading}</>}
           </button>
           {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-300">{error}</motion.div>}
         </motion.div>
