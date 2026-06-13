@@ -82,13 +82,15 @@ function InternationalPaymentContent() {
           <AnimatePresence mode="wait">
             {step === "pay" && (
               <motion.div key="pay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="glass p-6 mb-6">
-                  <p className="text-[var(--text-secondary)] text-sm mb-2">PingPong · {lang === "en" ? "Coming soon" : "即将上线"}</p>
-                  <p className="text-xs text-[var(--text-muted)]">Pay via Twitter DM for now — instant activation code delivery.</p>
-                </div>
                 <p className="text-[var(--gold)] font-bold text-lg mb-4">{plan === "pro" ? "$0.9" : "$9.9"}</p>
-                <button onClick={handleVerifyPayment} className="btn btn-primary w-full mb-3">
-                  {lang === "en" ? "I've Paid — Verify" : "我已付款，验证"}
+                <a href={process.env.NEXT_PUBLIC_PINGPONG_URL || "#"} target="_blank" rel="noopener noreferrer" className="btn btn-primary w-full mb-3">
+                  💳 {lang === "en" ? "Pay with PingPong" : "PingPong 支付"}
+                </a>
+                <p className="text-xs text-[var(--text-muted)] mb-3">
+                  {lang === "en" ? "After payment, verify to get your activation code." : "支付后点击下方验证获取激活码。"}
+                </p>
+                <button onClick={handleVerifyPayment} className="btn btn-secondary w-full mb-3">
+                  {lang === "en" ? "I've Paid — Get Code" : "我已付款，获取激活码"}
                 </button>
               </motion.div>
             )}
