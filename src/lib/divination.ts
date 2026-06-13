@@ -98,8 +98,53 @@ export function castHexagram(castType: CastType = "three-coins"): CastHexagram {
  * Format a hexagram's lines into Unicode trigram characters
  */
 export function hexagramToUnicode(hexagramId: number): string {
-  // Unicode hexagram characters start at U+4DC0 (䷀)
   return String.fromCodePoint(0x4DC0 + hexagramId - 1);
+}
+
+// ─── Plum Blossom / Number method: trigrams from numbers ──────
+
+const TRIGRAM_NUMBERS: Record<number, LineType[]> = {
+  1: ["yang", "yang", "yang"], // ☰ Qian
+  2: ["yang", "yang", "yin"],  // ☱ Dui
+  3: ["yang", "yin",  "yang"], // ☲ Li
+  4: ["yang", "yin",  "yin"],  // ☳ Zhen
+  5: ["yin",  "yang", "yang"], // ☴ Xun
+  6: ["yin",  "yang", "yin"],  // ☵ Kan
+  7: ["yin",  "yin",  "yang"], // ☶ Gen
+  0: ["yin",  "yin",  "yin"],  // ☷ Kun (remainder 0 = 8)
+};
+
+/**
+ * Plum Blossom / Number method: construct hexagram from 3 numbers
+ * num1 → upper trigram, num2 → lower trigram, num3 → changing line
+ */
+export function castFromNumbers(num1: number, num2: number, num3: number): CastHexagram {
+  const upperKey = num1 % 8;
+  const lowerKey = num2 % 8;
+  const changingPos = num3 % 6; // 0-5, where 0 = line 6
+
+  const upperLines = TRIGRAM_NUMBERS[upperKey];
+  const lowerLines = TRIGRAM_NUMBERS[lowerKey];
+  const lines: LineType[] = [...lowerLines, ...upperLines];
+
+  // Find the hexagram
+  const baseLines: LineType[] = lines.map(l => l);
+  let hexagram = HEXAGRAMS.find(h => h.lines.every((line, i) => line === baseLines[i]));
+  if (!hexagram) hexagram = HEXAGRAMS[0];
+
+  const changingLines: number[] = changingPos === 0 ? [6] : [changingPos];
+  const relatedHexagram = getRelatedHexagram(hexagram, changingLines);
+
+  return { hexagram, changingLines, isChanging: true, relatedHexagram };
+}
+
+/**
+ * Pure random hexagram — no casting, just select one of 64
+ */
+export function castRandomHexagram(): CastHexagram {
+  const id = Math.floor(Math.random() * 64) + 1;
+  const hexagram = HEXAGRAMS.find(h => h.id === id) || HEXAGRAMS[0];
+  return { hexagram, changingLines: [], isChanging: false };
 }
 
 /**

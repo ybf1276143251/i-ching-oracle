@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { castHexagram, CastType } from "@/lib/divination";
+import { castHexagram, CastType, castFromNumbers, castRandomHexagram } from "@/lib/divination";
 import { generateSummary } from "@/lib/deepseek";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { CastHexagram } from "@/lib/types";
 
 const FREE_DAILY_LIMIT = parseInt(process.env.NEXT_PUBLIC_FREE_DAILY_LIMIT || "3");
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { question, castType = "three-coins" } = body as {
+    const { question, castType = "three-coins", method, num1, num2, num3 } = body as {
       question: string;
       castType?: CastType;
+      method?: string;
+      num1?: number; num2?: number; num3?: number;
     };
 
     if (!question || question.trim().length === 0) {
@@ -52,8 +55,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Cast hexagram + AI summary
-    const cast = castHexagram(castType);
+    // Cast hexagram based on method
+    let cast: CastHexagram;
+    if (method === "plum" && num1 && num2 && num3) {
+      cast = castFromNumbers(num1, num2, num3);
+    } else if (method === "numbers" && num1 && num2 && num3) {
+      cast = castFromNumbers(num1, num2, num3);
+    } else if (method === "hexagram") {
+      cast = castRandomHexagram();
+    } else {
+      cast = castHexagram(castType);
+    }
+
+    // Generate AI summary with method-specific style
     const summary = await generateSummary(question, cast);
 
     // Save reading
