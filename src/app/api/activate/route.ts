@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Code not in DB — insert it now via admin
       try {
-        const admin = await createAdminSupabase();
+        const admin = createAdminSupabase();
         await admin.from("activation_codes").insert({
           code: trimmed, plan, is_used: true, used_by: user.id, used_at: new Date().toISOString(),
         });

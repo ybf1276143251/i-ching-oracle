@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const code = genCode(plan, username);
 
     try {
-      const admin = await createAdminSupabase();
+      const admin = createAdminSupabase();
       await admin.from("activation_codes").insert({ code, plan, is_used: false });
     } catch (e) {
       console.error("Insert code error:", e);
