@@ -47,7 +47,7 @@ export default function LandingPage() {
       </section>
 
       {/* Divination Methods */}
-      <section className="py-16 px-6">
+      <section id="methods" className="py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInView} className="text-3xl md:text-4xl font-bold text-gradient text-center mb-12">
             {lang === "en" ? "Choose Your Divination" : "选择占卜方式"}
@@ -163,9 +163,9 @@ export default function LandingPage() {
             <p className="text-[var(--text-secondary)] text-lg mb-10">
               {lang === "en" ? "Thousands have found clarity through the I Ching." : "无数人通过易经找到了清晰的方向。"}
             </p>
-            <Link href="/read/coins" className="btn btn-primary text-xl px-16 py-6 rounded-2xl font-bold shadow-[0_0_60px_rgba(212,175,55,0.2)]">
-              {lang === "en" ? "Ask the Oracle" : "向易经提问"}
-            </Link>
+            <a href="#methods" className="btn btn-primary text-xl px-16 py-6 rounded-2xl font-bold shadow-[0_0_60px_rgba(212,175,55,0.2)]">
+              {lang === "en" ? "Choose Your Divination" : "选择你的占卜方式"}
+            </a>
           </motion.div>
         </div>
       </section>

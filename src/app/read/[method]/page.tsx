@@ -6,6 +6,16 @@ import { hexagramToUnicode, castFromNumbers } from "@/lib/divination";
 import { useI18n } from "@/lib/i18n";
 import PremiumModal from "@/components/PremiumModal";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+
+const METHOD_ORDER = ["coins","yarrow","hexagram","plum","kingwen","numbers"];
+
+function MethodNav({ current }: { current: string }) {
+  const idx = METHOD_ORDER.indexOf(current);
+  const prev = idx > 0 ? METHOD_ORDER[idx - 1] : null;
+  const next = idx < METHOD_ORDER.length - 1 ? METHOD_ORDER[idx + 1] : null;
+  return (<div className="flex justify-between mt-8 gap-4">{prev?<Link href={`/read/${prev}`} className="btn btn-ghost btn-sm">← {METHODS[prev]?.icon} {METHODS[prev]?.titleZh}</Link>:<div/>}{next?<Link href={`/read/${next}`} className="btn btn-ghost btn-sm">{METHODS[next]?.icon} {METHODS[next]?.titleZh} →</Link>:<div/>}</div>);
+}
 
 const HexagramLines = ({ hexagramId, changingLines }: { hexagramId: number; changingLines: number[] }) => {
   const id = hexagramId - 1; const bits: boolean[] = [];
@@ -101,6 +111,9 @@ export default function MethodPage() {
         <div className="glass p-8 mb-6"><h3 className="text-lg font-semibold text-gradient mb-4">{t.aiSummary}</h3><div className="prose text-sm" dangerouslySetInnerHTML={{__html:result.summary.replace(/\n/g,"<br/>").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")}}/></div>
         {!fullText?(!isPremium?<div className="glass p-8 text-center"><p className="text-[var(--text-secondary)] mb-4">{lang==="en"?"Free summary. Upgrade to unlock the complete AI reading.":"免费摘要。升级解锁完整AI解读。"}</p><a href="/payment" className="btn btn-primary">乾 {lang==="en"?"Upgrade to Pro":"升级 Pro"}</a></div>:<div className="glass p-8 text-center"><p className="text-[var(--text-secondary)] mb-4">{lang==="en"?"Unlock your full AI reading.":"解锁完整AI解读。"}</p><button onClick={unlock} disabled={interpreting} className="btn btn-primary">{interpreting?<>☯...</>:<>释 {t.unlockFull}</>}</button></div>):(<motion.div initial={{opacity:0}} animate={{opacity:1}} className="glass p-8"><h3 className="text-lg font-semibold text-gradient mb-6">{t.fullInterpretation}</h3><div className="prose text-sm" dangerouslySetInnerHTML={{__html:fullText.replace(/\n/g,"<br/>").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")}}/></motion.div>)}
       </motion.div>)}</AnimatePresence>
+
+        {/* Method navigation */}
+        <MethodNav current={method} />
     </div>
   </div>);
 }
