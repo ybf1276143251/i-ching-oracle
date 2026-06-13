@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
+import { motion } from "framer-motion";
 
 export default function PaymentPage() {
   const { lang } = useI18n();
@@ -9,57 +10,55 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-lg mx-auto px-6">
-        <div className="glass glass-glow p-8 md:p-10 text-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass glass-glow p-8 md:p-10 text-center">
           <p className="text-5xl mb-4">⭐</p>
           <h1 className="text-3xl font-bold text-gradient mb-3">
-            {lang === "en" ? "Upgrade to Premium" : "升级 Premium"}
+            {lang === "en" ? "Upgrade Your Experience" : "升级体验"}
           </h1>
-          <p className="text-[var(--text-secondary)] text-sm mb-8">
-            {lang === "en" ? "Lifetime access · Unlimited readings · Full AI interpretation" : "终身访问 · 无限占卜 · 完整AI解读"}
-          </p>
 
-          <div className="mb-8">
-            <p className="text-5xl font-bold text-gradient">$9.9 / ¥9.9</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              {lang === "en" ? "One-time payment · Lifetime Premium" : "一次性支付 · 终身 Premium"}
+          {/* Features */}
+          <div className="glass p-5 mb-8 text-left text-sm space-y-2">
+            <p className="text-[var(--gold)] font-semibold text-center mb-3 text-base">
+              {lang === "en" ? "What You Get" : "你将获得"}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-[var(--gold)]">✓</span> {lang === "en" ? "Unlimited readings" : "无限次占卜"}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-[var(--gold)]">✓</span> {lang === "en" ? "Priority AI interpretation" : "优先AI解读"}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-[var(--gold)]">✓</span> {lang === "en" ? "Advanced insights & analysis" : "高级洞察与分析"}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-[var(--gold)]">✓</span> {lang === "en" ? "Ad-free experience" : "无广告体验"}
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 mx-auto max-w-[260px] mb-6">
-            <img src="/alipay-qr.jpg" alt="Payment QR Code" className="w-full rounded-xl" />
-            <p className="text-zinc-500 text-xs mt-2 text-center">
-              {lang === "en" ? "Alipay / WeChat Pay" : "支付宝 / 微信支付"}
-            </p>
-          </div>
-
-          <div className="bg-[rgba(255,255,255,0.03)] rounded-xl p-5 mb-6 text-left text-sm space-y-3">
-            <h3 className="font-semibold text-[var(--gold)] text-center mb-3">
-              {lang === "en" ? "📋 After Payment" : "📋 付款后"}
-            </h3>
-            <div className="space-y-2 text-[var(--text-secondary)]">
-              <p>{lang === "en" ? "1. Screenshot your payment confirmation" : "1. 截图支付凭证"}</p>
-              <p>{lang === "en" ? "2. Include your registered email" : "2. 附上注册邮箱"}</p>
-              <p>{lang === "en" ? "3. Send via any channel below" : "3. 通过以下任一方式发送"}</p>
-            </div>
-          </div>
-
-          <div className="space-y-3 mb-8">
-            <a href="https://twitter.com/Fassfannqbjj" target="_blank" rel="noopener noreferrer" className="btn btn-secondary w-full">
-              🐦 Twitter / X — @Fassfannqbjj
-            </a>
-            <div className="glass p-3 text-sm text-[var(--text-secondary)]">
-              📧 1276143251@qq.com
-            </div>
-          </div>
-
-          <p className="text-xs text-[var(--text-muted)] mb-6">
-            {lang === "en" ? "Activation within 24 hours after verification" : "审核通过后24小时内开通"}
+          {/* Payment options */}
+          <p className="text-[var(--text-muted)] text-sm mb-4">
+            {lang === "en" ? "Choose your payment method" : "选择支付方式"}
           </p>
 
-          <Link href="/read" className="btn btn-primary">
-            ← {lang === "en" ? "Back to Oracle" : "返回占卜"}
+          <div className="space-y-3 mb-6">
+            <Link href="/payment/china" className="btn btn-primary w-full">
+              🇨🇳 {lang === "en" ? "China · Alipay / WeChat" : "中国用户 · 支付宝 / 微信"}
+            </Link>
+            <Link href="/payment/international" className="btn btn-secondary w-full">
+              🌍 {lang === "en" ? "International · PingPong" : "国际用户 · PingPong"}
+            </Link>
+          </div>
+
+          <p className="text-xs text-[var(--text-muted)] mb-4">
+            {lang === "en"
+              ? "Already purchased? Enter your activation code."
+              : "已经购买？输入激活码解锁。"}
+          </p>
+
+          <Link href="/activate" className="btn btn-secondary w-full text-sm">
+            🔑 {lang === "en" ? "Activate Code" : "激活码解锁"}
           </Link>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

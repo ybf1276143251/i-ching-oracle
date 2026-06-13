@@ -1,15 +1,14 @@
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 -- I Ching Oracle — Supabase Schema
--- Run this in Supabase SQL Editor to set up the database
 -- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
--- ─── Users table (extends Supabase auth.users) ───────────
+-- ─── Profiles ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
   display_name TEXT,
   avatar_url TEXT,
-  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'premium')),
+  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'pro', 'lifetime')),
   readings_count INTEGER DEFAULT 0,
   is_premium BOOLEAN DEFAULT FALSE,
   premium_until TIMESTAMPTZ,
@@ -18,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ─── Readings (divination history) ───────────────────────
+-- ─── Readings ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.readings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -28,13 +27,24 @@ CREATE TABLE IF NOT EXISTS public.readings (
   related_hexagram INTEGER CHECK (related_hexagram BETWEEN 1 AND 64),
   changing_lines INTEGER[] DEFAULT '{}',
   summary TEXT NOT NULL,
-  interpretation TEXT,  -- Full interpretation (premium)
+  interpretation TEXT,
   is_premium BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ─── Hexagram SEO pages metadata ─────────────────────────
+-- ─── Activation Codes ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.activation_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL,
+  plan TEXT NOT NULL CHECK (plan IN ('pro', 'lifetime')),
+  used_by UUID REFERENCES public.profiles(id),
+  used_at TIMESTAMPTZ,
+  is_used BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── Hexagram SEO pages ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.hexagram_pages (
   id INTEGER PRIMARY KEY CHECK (id BETWEEN 1 AND 64),
   name_zh TEXT NOT NULL,
@@ -42,7 +52,7 @@ CREATE TABLE IF NOT EXISTS public.hexagram_pages (
   slug TEXT UNIQUE NOT NULL,
   meta_title TEXT NOT NULL,
   meta_description TEXT NOT NULL,
-  content_markdown TEXT,  -- Extended content for SEO page
+  content_markdown TEXT,
   historical_context TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -51,6 +61,8 @@ CREATE TABLE IF NOT EXISTS public.hexagram_pages (
 -- ─── Indexes ─────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_readings_user_id ON public.readings(user_id);
 CREATE INDEX IF NOT EXISTS idx_readings_created_at ON public.readings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activation_codes_code ON public.activation_codes(code);
+
 -- ─── Auto-update timestamps ──────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
@@ -75,11 +87,7 @@ CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, display_name)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data ->> 'display_name', split_part(NEW.email, '@', 1))
-  );
+  VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data ->> 'display_name', split_part(NEW.email, '@', 1)));
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -92,40 +100,16 @@ CREATE TRIGGER on_auth_user_created
 -- ─── Row Level Security ──────────────────────────────────
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.readings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activation_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hexagram_pages ENABLE ROW LEVEL SECURITY;
 
--- Profiles: users can read their own, admins can read all
-CREATE POLICY "Users can view own profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile"
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+CREATE POLICY "Anyone can read readings" ON public.readings FOR SELECT USING (TRUE);
+CREATE POLICY "Authenticated users can create readings" ON public.readings FOR INSERT WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+CREATE POLICY "Users can update own readings" ON public.readings FOR UPDATE USING (auth.uid() = user_id);
 
--- Readings: users can CRUD their own, public can read premium content
-CREATE POLICY "Anyone can read readings"
-  ON public.readings FOR SELECT
-  USING (TRUE);
+CREATE POLICY "Anyone can read activation codes" ON public.activation_codes FOR SELECT USING (TRUE);
 
-CREATE POLICY "Authenticated users can create readings"
-  ON public.readings FOR INSERT
-  WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
-
-CREATE POLICY "Users can update own readings"
-  ON public.readings FOR UPDATE
-  USING (auth.uid() = user_id);
-
--- Hexagram pages: public read
-CREATE POLICY "Public can read hexagram pages"
-  ON public.hexagram_pages FOR SELECT
-  USING (TRUE);
-
--- ─── Seed hexagram SEO pages ─────────────────────────────
--- Run this separately if you need to seed SEO data
--- INSERT INTO public.hexagram_pages (id, name_zh, name_en, slug, meta_title, meta_description)
--- SELECT
---   id, name, nameEn, LOWER(REPLACE(nameEn, ' ', '-')),
---   name || ' - ' || nameEn || ' | 易经占卜 I Ching Oracle',
---   '易经第' || id || '卦' || name || '（' || nameEn || '）的完整解读。' || description
--- FROM (VALUES ...) AS h(id, name, nameEn, description);
+CREATE POLICY "Public can read hexagram pages" ON public.hexagram_pages FOR SELECT USING (TRUE);
