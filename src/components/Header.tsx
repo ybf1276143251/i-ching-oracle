@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Header() {
   const { t, lang, toggleLang } = useI18n();
   const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [plan, setPlan] = useState<string>("free");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -26,6 +27,14 @@ export default function Header() {
     return () => l.subscription.unsubscribe();
   }, []);
 
+  // Fetch plan on user change
+  useEffect(() => {
+    if (!user) { setPlan("free"); return; }
+    fetch("/api/user").then(r => r.json()).then(d => {
+      if (d.user) setPlan(d.user.plan || "free");
+    }).catch(() => {});
+  }, [user]);
+
   return (
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-[rgba(212,175,55,0.1)]" : "bg-transparent"}`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -34,6 +43,11 @@ export default function Header() {
           <span className="text-base font-semibold text-gradient hidden sm:inline">
             {t.siteName}
           </span>
+          {plan !== "free" && (
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${plan === "lifetime" ? "text-[var(--gold)] border-[var(--gold)] bg-[var(--gold)]/10" : "text-[var(--gold)] border-[var(--gold)]/50 bg-[var(--gold)]/5"}`}>
+              {plan === "lifetime" ? "MAX" : "PRO"}
+            </span>
+          )}
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">

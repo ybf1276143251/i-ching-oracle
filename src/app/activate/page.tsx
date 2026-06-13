@@ -53,8 +53,23 @@ export default function ActivatePage() {
           </button>
 
           {result?.success && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-sm text-green-400 mb-4">
-              ✅ {result.message}
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-6 rounded-xl bg-green-500/10 border border-green-500/20 mb-6 text-center">
+              <p className="text-3xl mb-3">🎉</p>
+              <p className="text-[var(--gold)] font-bold text-lg mb-2">
+                {result.plan === "lifetime"
+                  ? (lang === "en" ? "Welcome, Max Member!" : "尊敬的 Max 用户")
+                  : (lang === "en" ? "Welcome, Pro Member!" : "尊敬的 Pro 用户")
+                }
+              </p>
+              <p className="text-sm text-green-400 mb-3">
+                {result.plan === "lifetime"
+                  ? (lang === "en" ? "Enjoy lifetime access to all premium features. Thank you for your support!" : "您可以终身使用 Pro 版本的全部功能。感谢支持！")
+                  : (lang === "en" ? "You can now enjoy unlimited readings, priority AI, and all premium features. Thank you!" : "您可以尽情使用无限占卜、优先AI解读等全部高级功能。感谢支持！")
+                }
+              </p>
+              <Link href="/read/coins" className="btn btn-primary btn-sm">
+                {lang === "en" ? "Start Your First Reading" : "开始占卜"}
+              </Link>
             </motion.div>
           )}
 

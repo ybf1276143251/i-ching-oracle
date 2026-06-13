@@ -45,10 +45,10 @@ export default function PricingPage() {
             <Link href="/payment?plan=pro" className="btn btn-primary w-full text-sm">{t.subscribeNow}</Link>
           </div>
 
-          {/* Lifetime */}
+          {/* Max */}
           <div className="glass p-8 flex flex-col text-center">
             <p className="text-4xl mb-2 text-gradient">䷀</p>
-            <h3 className="text-lg font-semibold mb-2">{t.lifetimePlan}</h3>
+            <h3 className="text-lg font-semibold mb-2">Max</h3>
             <p className="text-4xl font-bold mb-1">{lang === "en" ? "$9.9" : "¥9.9"}</p>
             <p className="text-sm text-[var(--text-muted)] mb-6">{t.oneTime}</p>
             <ul className="space-y-2 mb-8 flex-1 text-sm text-[var(--text-secondary)] text-left">
@@ -56,7 +56,7 @@ export default function PricingPage() {
               <li>✓ {t.feature5}</li>
               <li>✓ {lang === "en" ? "Forever updates" : "永久更新"}</li>
             </ul>
-            <Link href="/payment?plan=lifetime" className="btn btn-primary w-full text-sm">{t.buyLifetime}</Link>
+            <Link href="/payment?plan=lifetime" className="btn btn-primary w-full text-sm">{lang === "en" ? "Buy Max" : "购买 Max"}</Link>
           </div>
         </div>
       </div>
