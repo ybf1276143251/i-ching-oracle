@@ -10,7 +10,6 @@ function AuthForm() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [phoneOrEmail, setPhoneOrEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -83,9 +82,6 @@ function AuthForm() {
         </p>
       </div>
       <form onSubmit={handleSubmit} className="card space-y-4">
-        {mode === "register" && (
-          <div><label className="block text-sm text-[var(--text-muted)] mb-1">{t.displayName}</label><input type="text" className="input" value={displayName} onChange={e => setDisplayName(e.target.value)} /></div>
-        )}
         <div>
           <label className="block text-sm text-[var(--text-muted)] mb-1">
             {lang === "en" ? "Email or Phone" : "邮箱 / 手机号"}
