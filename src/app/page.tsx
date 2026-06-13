@@ -121,16 +121,17 @@ export default function LandingPage() {
             {/* Hexagram showcase grid */}
             <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4 max-w-3xl mx-auto mb-12">
               {"䷀䷁䷂䷃䷄䷅䷆䷇䷈䷉䷊䷋䷌䷍䷎䷏䷐䷑䷒䷓䷔䷕䷖䷗䷘䷙䷚䷛䷜䷝䷞䷟䷠䷡䷢䷣䷤䷥䷦䷧䷨䷩䷪䷫䷬䷭䷮䷯䷰䷱䷲䷳䷴䷵䷶䷷䷸䷹䷺䷻䷼䷽䷾䷿".split("").map((h, i) => (
-                <motion.span
-                  key={i}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={{ hidden: { opacity: 0, scale: 0.5 }, visible: { opacity: 1, scale: 1, transition: { delay: i * 0.015, duration: 0.3 } } }}
-                  className="text-xl md:text-3xl text-[var(--gold)]/60 hover:text-[var(--gold)] hover:scale-125 transition-all cursor-default"
-                >
-                  {h}
-                </motion.span>
+                <Link key={i} href={`/seo/${i + 1}`}>
+                  <motion.span
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={{ hidden: { opacity: 0, scale: 0.5 }, visible: { opacity: 1, scale: 1, transition: { delay: i * 0.015, duration: 0.3 } } }}
+                    className="block text-xl md:text-3xl text-[var(--gold)]/60 hover:text-[var(--gold)] hover:scale-125 transition-all cursor-pointer"
+                  >
+                    {h}
+                  </motion.span>
+                </Link>
               ))}
             </div>
 

@@ -57,7 +57,7 @@ export default function PremiumModal({ open, onClose }: PremiumModalProps) {
         <div className="space-y-3">
           {/* China — Alipay page */}
           <Link
-            href="/payment/china"
+            href="/payment"
             onClick={onClose}
             className="btn btn-primary w-full"
           >
