@@ -27,11 +27,19 @@ export default function Header() {
     return () => l.subscription.unsubscribe();
   }, []);
 
-  // Fetch plan on user change
+  // Fetch plan on mount and when user changes
   useEffect(() => {
     if (!user) { setPlan("free"); return; }
+    // Check localStorage first for immediate display
+    const localPlan = localStorage.getItem("iching-user-plan");
+    if (localPlan === "pro" || localPlan === "lifetime") setPlan(localPlan);
+    // Then verify from server
     fetch("/api/user").then(r => r.json()).then(d => {
-      if (d.user) setPlan(d.user.plan || "free");
+      if (d.user) {
+        const p = d.user.plan || "free";
+        setPlan(p);
+        localStorage.setItem("iching-user-plan", p);
+      }
     }).catch(() => {});
   }, [user]);
 

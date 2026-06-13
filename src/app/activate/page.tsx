@@ -22,6 +22,7 @@ export default function ActivatePage() {
         body: JSON.stringify({ code: code.trim() }),
       });
       const data = await res.json();
+      if (data.success) localStorage.setItem("iching-user-plan", data.plan || "lifetime");
       setResult(data);
     } catch {
       setResult({ error: lang === "en" ? "Network error" : "网络错误" });
