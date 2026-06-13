@@ -80,6 +80,15 @@ const METHODS: Record<string, {
     placeholderEn: "What life situation do you need clarity on?", placeholderZh: "你在什么人生处境上需要明晰？",
     showExtraInputs: false,
   },
+  hexagram: {
+    icon: "䷀", titleEn: "64 Hexagram Divination", titleZh: "64卦占卜",
+    descEn: "Randomly select one of the 64 hexagrams as your oracle. Let the I Ching speak directly to your question.",
+    descZh: "从六十四卦中随机取一卦为你答疑。让易经直接回应你的问题。",
+    castType: "random",
+    inputLabelEn: "What guidance are you seeking from the 64 hexagrams?", inputLabelZh: "你想从六十四卦中寻求什么指引？",
+    placeholderEn: "e.g. What do I need to know right now?\nWhat energy is surrounding my situation?", placeholderZh: "例如：此刻我需要知道什么？\n我的处境周围有什么能量？",
+    showExtraInputs: false,
+  },
   numbers: {
     icon: "数", titleEn: "Number Divination", titleZh: "数字卦",
     descEn: "Generate a hexagram from three meaningful numbers. Simple yet profound — used when you need quick guidance.",

@@ -13,7 +13,7 @@ const fadeInView = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0,
 const methods = [
   { key: "coins", icon: "乾", titleEn: "Coin Divination", titleZh: "金钱卦", descEn: "Three coins, six throws. The most popular I Ching method.", descZh: "三枚铜钱，投掷六次。最流行的易经占卜法。", href: "/read/coins" },
   { key: "yarrow", icon: "筮", titleEn: "Yarrow Stalk", titleZh: "蓍草占卜", descEn: "50 yarrow stalks. The ancient traditional method.", descZh: "五十根蓍草。最古老的占卜方法。", href: "/read/yarrow" },
-  { key: "hexagram", icon: "䷀", titleEn: "64 Hexagrams", titleZh: "64卦占卜", descEn: "Browse all hexagrams and find your guidance.", descZh: "浏览全部六十四卦，找到你的指引。", href: "/seo" },
+  { key: "hexagram", icon: "䷀", titleEn: "64 Hexagram Divination", titleZh: "64卦占卜", descEn: "Let the 64 hexagrams answer your question directly.", descZh: "让六十四卦直接回应你的问题。", href: "/read/hexagram" },
   { key: "plum", icon: "梅", titleEn: "Plum Blossom", titleZh: "梅花易数", descEn: "Based on time, date and numbers. Instant divination.", descZh: "以时间、日期、数字起卦。即时占卜。", href: "/read/plum" },
   { key: "kingwen", icon: "周", titleEn: "King Wen Oracle", titleZh: "文王卦", descEn: "The classic King Wen interpretation method.", descZh: "周文王创立的经典解卦法。", href: "/read/kingwen" },
   { key: "numerology", icon: "数", titleEn: "Number Divination", titleZh: "数字卦", descEn: "Use meaningful numbers to generate your hexagram.", descZh: "用有意义的数字生成卦象。", href: "/read/numbers" },
