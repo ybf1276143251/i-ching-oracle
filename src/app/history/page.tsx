@@ -40,7 +40,7 @@ export default function HistoryPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gradient">{t.history}</h1>
+        <h1 className="text-2xl font-bold text-gradient">{t.readings}</h1>
         <Link href="/" className="btn btn-secondary text-sm py-1.5 px-3">+ {t.newDivination}</Link>
       </div>
       {readings.length === 0 ? (

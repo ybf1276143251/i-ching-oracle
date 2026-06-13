@@ -2,98 +2,80 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
+  const { t, lang, toggleLang } = useI18n();
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { t, lang, toggleLang } = useI18n();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
     if (!supabase) return;
-
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => listener.subscription.unsubscribe();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    const { data: l } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user ?? null));
+    return () => l.subscription.unsubscribe();
   }, []);
 
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
+    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-[rgba(212,175,55,0.1)]" : "bg-transparent"}`}>
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <span className="text-2xl">☯</span>
-          <span className="text-base font-bold text-gradient hidden sm:inline">
+          <span className="text-base font-semibold text-gradient hidden sm:inline">
             {t.siteName}
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-5">
-          <Link href="/" className="text-[var(--muted)] hover:text-[var(--gold)] transition-colors text-sm">
-            {t.home}
-          </Link>
-          <Link href="/seo" className="text-[var(--muted)] hover:text-[var(--gold)] transition-colors text-sm">
-            {t.hexagrams64}
-          </Link>
-          <Link href="/history" className="text-[var(--muted)] hover:text-[var(--gold)] transition-colors text-sm">
-            {t.history}
-          </Link>
+        <nav className="hidden md:flex items-center gap-1">
+          {[{ href: "/", label: t.home }, { href: "/pricing", label: t.pricing }, { href: "/about", label: t.about }].map(item => (
+            <Link key={item.href} href={item.href} className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors rounded-lg hover:bg-white/5">
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Language toggle */}
-          <button
-            onClick={toggleLang}
-            className="text-xs px-2 py-1 rounded border border-[var(--border)] text-[var(--muted)] hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors"
-          >
-            {lang === "zh" ? "EN" : "中"}
+          <button onClick={toggleLang} className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--gold)] hover:border-[var(--gold)] transition-all">
+            {lang === "en" ? "中文" : "EN"}
           </button>
 
           {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-[var(--muted)] hidden sm:inline">
-                {user.email?.split("@")[0]}
-              </span>
-              <button
-                onClick={async () => {
-                  const supabase = createClient();
-                  if (supabase) await supabase.auth.signOut();
-                  setUser(null);
-                }}
-                className="text-xs text-[var(--muted)] hover:text-[var(--red-light)] transition-colors"
-              >
-                {t.logout}
-              </button>
-            </div>
+            <button onClick={async () => { const s = createClient(); if (s) await s.auth.signOut(); setUser(null); }} className="btn btn-ghost btn-sm text-xs">
+              {t.logout}
+            </button>
           ) : (
-            <Link href="/auth" className="btn btn-secondary text-xs py-1 px-3">
-              {t.login}
-            </Link>
+            <Link href="/auth" className="btn btn-ghost btn-sm text-xs">{t.login}</Link>
           )}
 
-          <button
-            className="md:hidden text-[var(--gold)] text-xl ml-1"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
+          <Link href="/" className="btn btn-primary btn-sm text-xs hidden sm:inline-flex">
+            {t.startReading}
+          </Link>
+
+          <button className="md:hidden text-[var(--text)] text-xl ml-1" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? "✕" : "☰"}
           </button>
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3 space-y-2">
-          <Link href="/" className="block text-sm py-1" onClick={() => setMenuOpen(false)}>{t.home}</Link>
-          <Link href="/seo" className="block text-sm py-1" onClick={() => setMenuOpen(false)}>{t.hexagrams64}</Link>
-          <Link href="/history" className="block text-sm py-1" onClick={() => setMenuOpen(false)}>{t.history}</Link>
-        </div>
-      )}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="md:hidden border-t border-[var(--border)] bg-[#0A0A0A]/95 backdrop-blur-xl px-4 py-3 space-y-1 overflow-hidden">
+            {[{ href: "/", label: t.home }, { href: "/pricing", label: t.pricing }, { href: "/about", label: t.about }].map(item => (
+              <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-sm text-[var(--text-secondary)] rounded-lg hover:bg-white/5">{item.label}</Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
