@@ -57,7 +57,7 @@ function InternationalPaymentContent() {
           <p className="text-3xl mb-3">🌍</p>
           <p className="text-4xl mb-3">{plan === "pro" ? "☰" : "䷀"}</p>
           <h1 className="text-2xl font-bold text-gradient mb-2">
-            {plan === "pro" ? "Pro" : "Lifetime"}
+            {plan === "pro" ? "Pro" : "Max"}
           </h1>
           <p className="text-[var(--gold)] text-lg font-bold mb-4">
             {plan === "pro" ? "$0.9/mo" : "$9.9 lifetime"}
@@ -66,7 +66,7 @@ function InternationalPaymentContent() {
           <div className="flex gap-2 justify-center mb-6">
             {(["pro", "lifetime"] as const).map(p => (
               <button key={p} onClick={() => { setPlan(p); setStep("pay"); }} className={`btn btn-sm ${plan === p ? "btn-primary" : "btn-ghost"} text-xs`}>
-                {p === "pro" ? "Pro" : "Lifetime"}
+                {p === "pro" ? "Pro" : "Max"}
               </button>
             ))}
           </div>

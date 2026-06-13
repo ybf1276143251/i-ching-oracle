@@ -71,7 +71,7 @@ function ChinaPaymentContent() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass glass-glow p-8 md:p-10 text-center">
           <p className="text-4xl mb-3">{plan === "pro" ? "☰" : "䷀"}</p>
           <h1 className="text-2xl font-bold text-gradient mb-2">
-            {plan === "pro" ? "Pro" : lang === "en" ? "Lifetime" : "终身"}
+            {plan === "pro" ? "Pro" : "Max"}
           </h1>
           <p className="text-[var(--gold)] text-lg font-bold mb-4">
             {plan === "pro" ? (lang === "en" ? "$0.9/mo" : "¥0.9/月") : (lang === "en" ? "$9.9 lifetime" : "¥9.9 终身")}
@@ -81,7 +81,7 @@ function ChinaPaymentContent() {
             {(["pro", "lifetime"] as const).map(p => (
               <button key={p} onClick={() => { setPlan(p); setStep("pay"); }}
                 className={`btn btn-sm ${plan === p ? "btn-primary" : "btn-ghost"} text-xs`}>
-                {p === "pro" ? "Pro" : lang === "en" ? "Lifetime" : "终身"} · {p === "pro" ? (lang === "en" ? "$0.9" : "¥0.9") : (lang === "en" ? "$9.9" : "¥9.9")}
+                {p === "pro" ? "Pro" : "Max"} · {p === "pro" ? (lang === "en" ? "$0.9" : "¥0.9") : (lang === "en" ? "$9.9" : "¥9.9")}
               </button>
             ))}
           </div>

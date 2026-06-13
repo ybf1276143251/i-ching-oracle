@@ -1,18 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import { motion } from "framer-motion";
 
 export default function PricingPage() {
   const { t, lang } = useI18n();
+  const [userPlan, setUserPlan] = useState("free");
+
+  useEffect(() => {
+    fetch("/api/user").then(r => r.json()).then(d => {
+      if (d.user) setUserPlan(d.user.plan || "free");
+    }).catch(() => {});
+  }, []);
+
+  const isPaid = userPlan !== "free";
 
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-4xl mx-auto px-6">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center mb-16">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4"><span className="text-gradient">{t.pricingTitle}</span></h1>
           <p className="text-[var(--text-secondary)] text-lg">{t.pricingSubtitle}</p>
+          {isPaid && (
+            <div className="mt-6 inline-block glass p-4 text-sm">
+              <span className="text-[var(--gold)] font-bold">
+                {lang === "en" ? "Current Plan: " : "当前方案："}
+                {userPlan === "lifetime" ? "Max" : "Pro"}
+              </span>
+              <span className="text-[var(--text-muted)] ml-2">
+                {lang === "en" ? "— Thank you for your support!" : "— 感谢你的支持！"}
+              </span>
+            </div>
+          )}
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
@@ -26,7 +47,7 @@ export default function PricingPage() {
               <li>✓ {t.feature1}</li>
               <li>✓ {lang === "en" ? "Basic interpretation" : "基础解读"}</li>
             </ul>
-            <Link href="/read" className="btn btn-secondary w-full text-sm">{t.getStarted}</Link>
+            <Link href="/read/coins" className="btn btn-secondary w-full text-sm">{t.getStarted}</Link>
           </div>
 
           {/* Pro */}
@@ -52,7 +73,7 @@ export default function PricingPage() {
             <p className="text-4xl font-bold mb-1">{lang === "en" ? "$9.9" : "¥9.9"}</p>
             <p className="text-sm text-[var(--text-muted)] mb-6">{t.oneTime}</p>
             <ul className="space-y-2 mb-8 flex-1 text-sm text-[var(--text-secondary)] text-left">
-              <li>✓ {lang === "en" ? "All Pro features" : "Pro全部功能"}</li>
+              <li>✓ {lang === "en" ? "All Pro features" : "Pro 全部功能"}</li>
               <li>✓ {t.feature5}</li>
               <li>✓ {lang === "en" ? "Forever updates" : "永久更新"}</li>
             </ul>

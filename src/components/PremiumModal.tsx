@@ -24,11 +24,11 @@ export default function PremiumModal({ open, onClose }: PremiumModalProps) {
           ))}
         </div>
         <div className="space-y-3">
-          <Link href="/payment/china" onClick={onClose} className="btn btn-primary w-full">
-            🇨🇳 {lang === "en" ? "China · ¥0.9 / ¥9.9" : "中国用户 · ¥0.9 / ¥9.9"}
+          <Link href="/payment?plan=pro" onClick={onClose} className="btn btn-primary w-full">
+            {lang === "en" ? "Pro · $0.9/mo" : "Pro · ¥0.9/月"}
           </Link>
-          <Link href="/payment/international" onClick={onClose} className="btn btn-secondary w-full">
-            🌍 {lang === "en" ? "International · $0.9 / $9.9" : "国际用户 · $0.9 / $9.9"}
+          <Link href="/payment?plan=lifetime" onClick={onClose} className="btn btn-secondary w-full">
+            {lang === "en" ? "Max · $9.9 lifetime" : "Max · ¥9.9 终身"}
           </Link>
         </div>
         <p className="text-xs text-[var(--text-muted)] text-center mt-4">
