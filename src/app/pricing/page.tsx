@@ -154,7 +154,15 @@ export default function PricingPage() {
               <li>✓ {lang === "en" ? "Priority access" : "优先访问"}</li>
               <li>✓ {lang === "en" ? "Early access to new features" : "新功能抢先体验"}</li>
             </ul>
-            <button onClick={() => setShowWaitlist(true)} className="btn btn-primary w-full text-sm">
+            <div className="space-y-2 mb-3">
+              <Link href="/payment/china" className="btn btn-primary w-full text-sm">
+                💚 {lang === "en" ? "Pay with WeChat" : "微信支付"}
+              </Link>
+              <Link href="/payment/china" className="btn btn-secondary w-full text-sm">
+                💙 {lang === "en" ? "Pay with Alipay" : "支付宝支付"}
+              </Link>
+            </div>
+            <button onClick={() => setShowWaitlist(true)} className="btn btn-secondary w-full text-sm">
               {lang === "en" ? "Join Pro Waitlist" : "加入 Pro 等待名单"}
             </button>
             <p className="text-xs text-[var(--text-muted)] mt-3">

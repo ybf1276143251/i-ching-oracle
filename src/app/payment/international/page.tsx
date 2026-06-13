@@ -27,6 +27,15 @@ export default function InternationalPaymentPage() {
             <p className="text-[var(--text-secondary)]">✓ Early access to new features</p>
           </div>
 
+          <div className="space-y-2 mb-3">
+            <Link href="/payment/china" className="btn btn-primary w-full">
+              💚 {lang === "en" ? "Pay with WeChat" : "微信支付"}
+            </Link>
+            <Link href="/payment/china" className="btn btn-secondary w-full">
+              💙 {lang === "en" ? "Pay with Alipay" : "支付宝支付"}
+            </Link>
+          </div>
+
           <Link href="/pricing" className="btn btn-primary w-full mb-3">
             {lang === "en" ? "Join Pro Waitlist" : "加入 Pro 等待名单"}
           </Link>
