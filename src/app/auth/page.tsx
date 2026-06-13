@@ -22,7 +22,7 @@ function AuthForm() {
     const trimmed = input.trim();
     // If it's a phone number (all digits, 7-15 chars)
     if (/^\d{7,15}$/.test(trimmed)) {
-      return `p${trimmed}@iching.user`;
+      return `phone_${trimmed}@iching.local`;
     }
     return trimmed;
   }
