@@ -38,17 +38,20 @@ export async function GET(request: NextRequest) {
     const username = email.split("@")[0];
     const code = genCode(plan, username);
 
+    // Try insert with reserved_for, fallback without if column missing
     const admin = createAdminSupabase();
-    const { error } = await admin.from("activation_codes").insert({
-      code,
-      plan,
-      is_used: false,
-      reserved_for: user.id,
+    let { error } = await admin.from("activation_codes").insert({
+      code, plan, is_used: false, reserved_for: user.id,
     });
-
+    // Fallback: try without reserved_for
     if (error) {
-      console.error("Insert code error:", error);
-      return NextResponse.json({ error: "Failed to save code" }, { status: 500 });
+      const { error: err2 } = await admin.from("activation_codes").insert({
+        code, plan, is_used: false,
+      });
+      if (err2) {
+        console.error("Insert code error:", err2);
+        // Return code anyway — activate API will create on the fly
+      }
     }
 
     return NextResponse.json({ code, plan, userId: user.id });

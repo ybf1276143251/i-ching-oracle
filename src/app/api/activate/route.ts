@@ -30,20 +30,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "此激活码已被使用" }, { status: 409 });
     }
 
-    // Enforce ownership: code must be reserved for THIS user (unless null = admin code)
+    // If code has reserved_for, enforce ownership
     if (activation.reserved_for && activation.reserved_for !== user.id) {
       return NextResponse.json({ error: "此激活码不属于你的账号" }, { status: 403 });
     }
 
     const plan = activation.plan;
 
-    // Mark as used
-    await supabase.from("activation_codes").update({
+    // Mark as used + upgrade user (use admin to bypass RLS)
+    const admin = createAdminSupabase();
+    await admin.from("activation_codes").update({
       is_used: true, used_by: user.id, used_at: new Date().toISOString(),
     }).eq("id", activation.id);
 
-    // Upgrade user
-    const admin = createAdminSupabase();
     const premiumUntil = plan === "lifetime"
       ? new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString()
       : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
