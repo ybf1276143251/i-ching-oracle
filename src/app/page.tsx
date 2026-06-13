@@ -1,279 +1,201 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { hexagramToUnicode, CastType } from "@/lib/divination";
+import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
-import PremiumModal from "@/components/PremiumModal";
 import ParticleBackground from "@/components/ParticleBackground";
-import { motion, AnimatePresence } from "framer-motion";
+import YinYangAnimation from "@/components/YinYangAnimation";
+import { motion } from "framer-motion";
 
-interface CastResult {
-  readingId: string | null;
-  cast: { hexagram: { id: number; name: string; nameEn: string; judgment: string; judgmentEn: string }; changingLines: number[]; isChanging: boolean; relatedHexagram: { id: number; name: string; nameEn: string } | null };
-  summary: string;
+const fadeIn = { hidden: { opacity: 0, y: 30 }, visible: (i = 0) => ({ opacity: 1, y: 0, transition: { delay: i * 0.12, duration: 0.7 } }) };
+const fadeInView = { hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8 } } };
+
+function StatsBadge({ value, label }: { value: string; label: string }) {
+  return <div className="text-center"><p className="text-3xl font-bold text-gradient">{value}</p><p className="text-xs text-[var(--text-muted)] mt-1">{label}</p></div>;
 }
 
-function HexagramLines({ hexagramId, changingLines }: { hexagramId: number; changingLines: number[] }) {
-  const id = hexagramId - 1;
-  const bits: boolean[] = [];
-  for (let i = 0; i < 6; i++) bits.push(((id >> i) & 1) === 1);
-  return (
-    <div className="flex flex-col items-center gap-1 my-4">
-      {[5, 4, 3, 2, 1, 0].map(i => {
-        const ln = i + 1; const yang = bits[i]; const ch = changingLines.includes(ln);
-        return (
-          <div key={i} className="flex items-center gap-3">
-            <span className="text-xs text-[var(--text-muted)] w-4 text-right">{ln}</span>
-            {yang ? <div className="hex-line-yang" /> : <div className="flex gap-3" style={{ width: 90 }}><div className="hex-line-yin-half" /><div className="hex-line-yin-half" /></div>}
-            {ch && <span className="text-[var(--gold)] text-xs font-bold">→</span>}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Trust stats ─────────────────────────────────────────────
-
-function TrustSection() {
-  const { t } = useI18n();
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-24">
-      {[{ v: "64", l: t.trust64 }, { v: "AI", l: t.trustAI }, { v: "10K+", l: t.trustReadings }, { v: "EN/中", l: t.trustBilingual }].map((s, i) => (
-        <div key={i} className="glass p-6 text-center">
-          <p className="text-2xl font-bold text-gradient mb-1">{s.v}</p>
-          <p className="text-xs text-[var(--text-muted)]">{s.l}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Reading sections ────────────────────────────────────────
-
-function sectionTitles(lang: string, t: any) {
-  return [
-    { key: "overview", title: t.overview },
-    { key: "career", title: t.career },
-    { key: "love", title: t.love },
-    { key: "wealth", title: t.wealth },
-    { key: "growth", title: t.growth },
-    { key: "action", title: t.action },
-  ];
-}
-
-// Simple parser to split AI text into sections
-function parseSections(text: string): Record<string, string> {
-  const s: Record<string, string> = { overview: "", career: "", love: "", wealth: "", growth: "", action: "" };
-  const keys = ["overview", "career", "love", "wealth", "growth", "action"];
-  const markers = [
-    /(?:overview|overall|卦象概述|卦象总览|总览)/i,
-    /(?:career|work|事业|工作)/i,
-    /(?:love|relationship|感情|人际|爱情)/i,
-    /(?:wealth|finance|money|财运|财富|金钱)/i,
-    /(?:growth|personal|成长|个人)/i,
-    /(?:action|recommend|建议|行动)/i,
-  ];
-
-  // Try to split by markdown headings
-  const parts = text.split(/(?=###?\s)/);
-  let currentKey = "overview";
-
-  for (const part of parts) {
-    let matched = false;
-    for (let i = 0; i < markers.length; i++) {
-      if (markers[i].test(part.substring(0, 80))) {
-        currentKey = keys[i];
-        matched = true;
-        break;
-      }
-    }
-    if (!matched && part === parts[0]) currentKey = "overview";
-    s[currentKey] = (s[currentKey] ? s[currentKey] + "\n" : "") + part;
-  }
-
-  // If no sections were parsed, put everything in overview
-  if (!s.overview && text) s.overview = text;
-
-  return s;
-}
-
-// ─── Main Page ───────────────────────────────────────────────
-
-export default function Home() {
+export default function LandingPage() {
   const { t, lang } = useI18n();
-  const [question, setQuestion] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CastResult | null>(null);
-  const [error, setError] = useState("");
-  const [interpreting, setInterpreting] = useState(false);
-  const [fullText, setFullText] = useState("");
-  const [isPremium, setIsPremium] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const resultRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetch("/api/user").then(r => r.json()).then(d => {
-      if (d.user) setIsPremium(d.user.is_premium || d.user.plan === "premium");
-    }).catch(() => {});
-  }, []);
-
-  const handleDivine = async () => {
-    if (!question.trim()) { setError(lang === "en" ? "Please enter your question." : "请输入你的问题"); return; }
-    setError(""); setLoading(true); setResult(null); setFullText("");
-    try {
-      const res = await fetch("/api/divine", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: question.trim(), castType: "three-coins" }) });
-      const data = await res.json();
-      if (!res.ok) { if (data.limitReached) setShowModal(true); throw new Error(data.error); }
-      setResult(data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
-    } catch (e) { setError(e instanceof Error ? e.message : "Error"); }
-    finally { setLoading(false); }
-  };
-
-  const handleUnlock = async () => {
-    if (!isPremium) { setShowModal(true); return; }
-    if (!result) return;
-    setInterpreting(true);
-    try {
-      const res = await fetch("/api/interpret", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ readingId: result.readingId, question: question.trim(), hexagramId: result.cast.hexagram.id, relatedHexagramId: result.cast.relatedHexagram?.id, changingLines: result.cast.changingLines }) });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error);
-      setFullText(d.interpretation);
-    } catch (e) { setError(e instanceof Error ? e.message : "Error"); }
-    finally { setInterpreting(false); }
-  };
-
-  const sections = fullText ? parseSections(fullText) : null;
-  const sectionMeta = sectionTitles(lang, t);
 
   return (
     <div className="relative">
-      <PremiumModal open={showModal} onClose={() => setShowModal(false)} />
       <ParticleBackground />
 
-      {/* ─── Hero ─── */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 pt-16">
-        <div className="max-w-3xl mx-auto text-center z-10">
-          <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
-            <p className="text-sm text-[var(--gold)] tracking-[0.2em] uppercase mb-6">{t.tagline}</p>
-            <h1 className="text-5xl md:text-7xl font-bold leading-[1.08] mb-6">
-              <span className="text-gradient">{t.heroTitle.split("\n")[0]}</span>
-              <br />
-              <span className="text-[var(--text)]">{t.heroTitle.split("\n")[1] || ""}</span>
-            </h1>
-            <p className="text-[var(--text-secondary)] text-lg md:text-xl max-w-xl mx-auto mb-10 leading-relaxed">
-              {t.heroSubtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#reading" className="btn btn-primary text-base px-10 py-4">🔮 {t.startReading}</a>
-              <a href="#trust" className="btn btn-secondary text-base px-10 py-4">{t.learnMore}</a>
-            </div>
-          </motion.div>
+      {/* ━━━━━━━━━━━━━━━━━━━━ HERO ━━━━━━━━━━━━━━━━━━━━ */}
+      <section className="relative min-h-screen flex items-center justify-center px-6">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+          <div className="w-[500px] h-[500px] rounded-full bg-[var(--gold)] blur-[150px]" />
         </div>
 
-        {/* Hero glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[var(--gold)] opacity-[0.03] blur-[120px] pointer-events-none" />
-      </section>
+        <div className="max-w-5xl mx-auto text-center z-10">
+          <motion.div initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}>
+            <motion.p variants={fadeIn} custom={0} className="text-sm text-[var(--gold)] tracking-[0.25em] uppercase mb-8 font-medium">
+              {t.tagline}
+            </motion.p>
 
-      {/* ─── Trust ─── */}
-      <section id="trust" className="max-w-5xl mx-auto px-6 pb-8">
-        <TrustSection />
-      </section>
-
-      {/* ─── Reading Input ─── */}
-      <section id="reading" className="max-w-2xl mx-auto px-6 pb-24">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="glass glass-glow p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-gradient mb-2">{t.questionTitle}</h2>
-          <p className="text-sm text-[var(--text-muted)] mb-6">
-            {lang === "en" ? "Examples below. Be specific for deeper insight." : "下方有示例。问题越具体，解读越深入。"}
-          </p>
-          <textarea
-            className="input min-h-[120px] resize-y mb-2 text-base"
-            placeholder={t.questionPlaceholder}
-            value={question}
-            onChange={e => setQuestion(e.target.value)}
-            maxLength={500}
-            disabled={loading}
-          />
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-xs text-[var(--text-muted)]">{question.length}/500</span>
-          </div>
-          <button onClick={handleDivine} disabled={loading || !question.trim()} className="btn btn-primary w-full py-4 text-base">
-            {loading ? <><span className="inline-block animate-spin">☯</span> {t.generating}</> : <>🔮 {t.generateReading}</>}
-          </button>
-
-          {error && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-300">
-              {error}
+            <motion.div variants={fadeIn} custom={1} className="mb-10">
+              <YinYangAnimation />
             </motion.div>
-          )}
-        </motion.div>
+
+            <motion.h1 variants={fadeIn} custom={2} className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-8 tracking-tight">
+              <span className="text-gradient">Ancient Wisdom</span>
+              <br />
+              <span className="text-[var(--text)]">Modern Intelligence</span>
+            </motion.h1>
+
+            <motion.p variants={fadeIn} custom={3} className="text-[var(--text-secondary)] text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed">
+              {lang === "en"
+                ? "The 3,000-year-old Book of Changes meets cutting-edge AI. Ask any question about your life, career, or relationships — and receive profound guidance rooted in ancient Chinese philosophy."
+                : "三千年《易经》智慧邂逅现代人工智能。提出你关于人生、事业或关系的任何问题，获得根植于中国古典哲学的深度指引。"
+              }
+            </motion.p>
+
+            <motion.div variants={fadeIn} custom={4} className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/read" className="btn btn-primary text-lg px-12 py-5 rounded-2xl font-semibold">
+                🔮 {lang === "en" ? "Try the Oracle" : "开始占卜"}
+              </Link>
+              <a href="#learn" className="btn btn-secondary text-lg px-12 py-5 rounded-2xl">
+                {lang === "en" ? "Discover More" : "了解更多"}
+              </a>
+            </motion.div>
+
+            <motion.div variants={fadeIn} custom={5} className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
+              <StatsBadge value="64" label={lang === "en" ? "Hexagrams" : "卦象"} />
+              <StatsBadge value="3K+" label={lang === "en" ? "Years of Wisdom" : "年智慧"} />
+              <StatsBadge value="AI" label={lang === "en" ? "Powered by AI" : "AI驱动"} />
+              <StatsBadge value="∞" label={lang === "en" ? "Possibilities" : "无限可能"} />
+            </motion.div>
+          </motion.div>
+        </div>
       </section>
 
-      {/* ─── Results ─── */}
-      <AnimatePresence>
-        {result && (
-          <motion.section ref={resultRef} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }} className="max-w-3xl mx-auto px-6 pb-24">
-            {/* Hexagram header */}
-            <div className="glass glass-glow p-8 md:p-10 text-center mb-6">
-              <p className="text-sm text-[var(--text-muted)] uppercase tracking-widest mb-4">{t.resultTitle}</p>
-              <div className="text-8xl mb-4">{hexagramToUnicode(result.cast.hexagram.id)}</div>
-              <h2 className="text-3xl font-bold text-gradient mb-1">{result.cast.hexagram.name}</h2>
-              <p className="text-[var(--text-secondary)]">{result.cast.hexagram.nameEn} · #{result.cast.hexagram.id}</p>
-              <HexagramLines hexagramId={result.cast.hexagram.id} changingLines={result.cast.changingLines} />
+      {/* ━━━━━━━━━━━━━━━━━━━━ WHAT IS I CHING ━━━━━━━━━━━━━━━━━━━━ */}
+      <section id="learn" className="py-24 md:py-32 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeInView} className="text-center mb-16">
+            <p className="text-sm text-[var(--gold)] tracking-[0.2em] uppercase mb-4">{lang === "en" ? "Ancient Wisdom" : "千年智慧"}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">{lang === "en" ? "What is the I Ching?" : "什么是易经？"}</h2>
+            <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto leading-relaxed">
+              {lang === "en"
+                ? "The I Ching (Book of Changes) is humanity's oldest oracle — a profound philosophical system that has guided emperors, scholars, and seekers for over three millennia. It reveals the patterns of change that govern our lives through 64 archetypal hexagrams."
+                : "《易经》，又称《周易》，是人类最古老的智慧典籍——一部深刻的哲学体系，三千年来指引着帝王、学者与求道者。它通过六十四卦揭示支配生命变化的宇宙规律。"
+              }
+            </p>
+          </motion.div>
 
-              {result.cast.changingLines.length > 0 && (
-                <p className="text-xs text-[var(--text-muted)] mt-2">{t.changingLine} {result.cast.changingLines.join(", ")}</p>
-              )}
-              {result.cast.relatedHexagram && (
-                <div className="mt-6 pt-6 border-t border-[var(--border)]">
-                  <p className="text-xs text-[var(--text-muted)] mb-2">{t.relatedHexagram}</p>
-                  <div className="text-4xl">{hexagramToUnicode(result.cast.relatedHexagram.id)}</div>
-                  <p className="text-base font-medium text-gradient">{result.cast.relatedHexagram.name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{result.cast.relatedHexagram.nameEn}</p>
-                </div>
-              )}
-            </div>
-
-            {/* AI Summary */}
-            <div className="glass p-8 md:p-10 mb-6">
-              <h3 className="text-lg font-semibold text-gradient mb-4">{t.aiSummary}</h3>
-              <div className="prose text-sm" dangerouslySetInnerHTML={{ __html: result.summary.replace(/\n/g, "<br/>").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") }} />
-            </div>
-
-            {/* Full reading */}
-            {!fullText ? (
-              <div className="glass p-8 md:p-10 text-center">
-                <p className="text-[var(--text-secondary)] mb-4">
-                  {isPremium ? (lang === "en" ? "Unlock your full AI reading with deep insights." : "解锁你的完整 AI 深度解读。") : (lang === "en" ? "Free summary above. Upgrade to Premium for the complete reading." : "以上为免费摘要。升级 Premium 获取完整解读。")}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <button onClick={handleUnlock} disabled={interpreting} className="btn btn-primary">
-                    {interpreting ? <><span className="animate-spin">☯</span> {lang === "en" ? "Generating..." : "生成中..."}</> : <>🔮 {t.unlockFull}</>}
-                  </button>
-                  {!isPremium && (
-                    <button onClick={() => setShowModal(true)} className="btn btn-secondary">⭐ {t.upgradePremium}</button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="space-y-4">
-                {sectionMeta.map(({ key, title }, i) => {
-                  const content = sections?.[key];
-                  if (!content || content.trim().length < 10) return null;
-                  return (
-                    <motion.div key={key} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08, duration: 0.4 }} className="glass p-6 md:p-8">
-                      <h3 className="text-base font-semibold text-gradient mb-3">{title}</h3>
-                      <div className="prose text-sm" dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, "<br/>").replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/###?\s*(.+)/g, "<h3>$1</h3>") }} />
-                    </motion.div>
-                  );
-                })}
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: "☯", title: lang === "en" ? "Yin & Yang" : "阴阳", desc: lang === "en" ? "The fundamental duality of existence — light and dark, action and rest, expansion and contraction. Balance is the key to harmony." : "存在的基本二元性——光明与黑暗、行动与休息、扩张与收缩。平衡是和谐的关键。" },
+              { icon: "☰", title: lang === "en" ? "The Trigrams" : "八卦", desc: lang === "en" ? "Eight fundamental symbols representing Heaven, Earth, Thunder, Wind, Water, Fire, Mountain, and Lake. Combined to form the 64 hexagrams." : "八个基本符号代表天、地、雷、风、水、火、山、泽。两两相重组成六十四卦。" },
+              { icon: "🔮", title: lang === "en" ? "Personal Guidance" : "人生指引", desc: lang === "en" ? "Each hexagram offers timeless wisdom for your specific situation — career decisions, relationships, personal growth, and life's crossroads." : "每一卦为你当下的处境提供永恒的智慧——职业决策、人际关系、个人成长和人生十字路口。" },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { delay: i * 0.15, duration: 0.6 } } }}
+                className="glass p-8 text-center group hover:border-[var(--border-hover)] transition-all duration-500"
+              >
+                <p className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-500">{item.icon}</p>
+                <h3 className="text-lg font-semibold text-[var(--text)] mb-3">{item.title}</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
               </motion.div>
-            )}
-          </motion.section>
-        )}
-      </AnimatePresence>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━ THE 64 HEXAGRAMS ━━━━━━━━━━━━━━━━━━━━ */}
+      <section className="py-24 md:py-32 px-6 bg-white/[0.015]">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInView}>
+            <p className="text-sm text-[var(--gold)] tracking-[0.2em] uppercase mb-4">{lang === "en" ? "The 64 Gates of Wisdom" : "六十四道智慧之门"}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">{lang === "en" ? "Each Hexagram Tells a Story" : "每一卦，都是一个故事"}</h2>
+            <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+              {lang === "en"
+                ? "From 'The Creative' to 'Before Completion', each of the 64 hexagrams represents a unique life situation — with profound insights waiting to be discovered through AI interpretation."
+                : "从「乾为天」到「火水未济」，六十四卦代表着六十四种人生情境——通过AI解读，深层的智慧等待被发现的。"
+              }
+            </p>
+
+            {/* Hexagram showcase grid */}
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4 max-w-3xl mx-auto mb-12">
+              {"䷀䷁䷂䷃䷄䷅䷆䷇䷈䷉䷊䷋䷌䷍䷎䷏䷐䷑䷒䷓䷔䷕䷖䷗䷘䷙䷚䷛䷜䷝䷞䷟䷠䷡䷢䷣䷤䷥䷦䷧䷨䷩䷪䷫䷬䷭䷮䷯䷰䷱䷲䷳䷴䷵䷶䷷䷸䷹䷺䷻䷼䷽䷾䷿".split("").map((h, i) => (
+                <motion.span
+                  key={i}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={{ hidden: { opacity: 0, scale: 0.5 }, visible: { opacity: 1, scale: 1, transition: { delay: i * 0.015, duration: 0.3 } } }}
+                  className="text-xl md:text-3xl text-[var(--gold)]/60 hover:text-[var(--gold)] hover:scale-125 transition-all cursor-default"
+                >
+                  {h}
+                </motion.span>
+              ))}
+            </div>
+
+            <Link href="/read" className="btn btn-primary text-lg px-12 py-5 rounded-2xl font-semibold">
+              🔮 {lang === "en" ? "Begin Your Reading" : "开始你的占卜"}
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━ HOW IT WORKS ━━━━━━━━━━━━━━━━━━━━ */}
+      <section className="py-24 md:py-32 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInView} className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">{lang === "en" ? "How It Works" : "如何使用"}</h2>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { step: "01", icon: "✍️", title: lang === "en" ? "Ask Your Question" : "提出问题", desc: lang === "en" ? "Form your question with sincerity and clarity. The more specific your question, the deeper the guidance." : "以真诚与清晰提出你的问题。问题越具体，指引越深入。" },
+              { step: "02", icon: "☯", title: lang === "en" ? "Receive Your Hexagram" : "获得卦象", desc: lang === "en" ? "I Ching responds with one of the 64 hexagrams. Each line carries meaning, each change reveals insight." : "易经以六十四卦之一回应你。每一爻皆有意义，每一变皆藏玄机。" },
+              { step: "03", icon: "✨", title: lang === "en" ? "AI Deep Interpretation" : "AI深度解读", desc: lang === "en" ? "Our AI translates ancient Chinese wisdom into personal, actionable guidance for your modern life." : "AI将古老的中国智慧转化为针对你现代生活的个性化、可行动的指引。" },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { delay: i * 0.2, duration: 0.6 } } }}
+                className="text-center"
+              >
+                <p className="text-5xl mb-4">{item.icon}</p>
+                <p className="text-xs text-[var(--gold)] tracking-widest mb-2">{item.step}</p>
+                <h3 className="text-xl font-semibold text-[var(--text)] mb-3">{item.title}</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
+                {i < 2 && <div className="hidden md:block absolute right-0 top-1/2 text-[var(--gold)]/30 text-2xl">→</div>}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━ FINAL CTA ━━━━━━━━━━━━━━━━━━━━ */}
+      <section className="py-24 md:py-32 px-6 relative">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-[400px] h-[400px] rounded-full bg-[var(--gold)] blur-[120px] opacity-[0.04]" />
+        </div>
+        <div className="max-w-2xl mx-auto text-center relative z-10">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInView}>
+            <div className="text-6xl mb-6">☯</div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">
+              {lang === "en" ? "Ready to Discover Your Path?" : "准备好探索你的道路了吗？"}
+            </h2>
+            <p className="text-[var(--text-secondary)] text-lg mb-10 leading-relaxed">
+              {lang === "en"
+                ? "Thousands have found clarity through the I Ching. The ancient oracle awaits your question."
+                : "无数人通过易经找到了清晰的方向。古老的智慧等待着你的提问。"
+              }
+            </p>
+            <Link href="/read" className="btn btn-primary text-xl px-16 py-6 rounded-2xl font-bold shadow-[0_0_60px_rgba(212,175,55,0.2)]">
+              🔮 {lang === "en" ? "Ask the Oracle" : "向易经提问"}
+            </Link>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }
