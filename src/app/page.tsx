@@ -53,7 +53,7 @@ export default function LandingPage() {
               <Link href="/read" className="btn btn-primary text-lg px-12 py-5 rounded-2xl font-semibold">
                 🔮 {lang === "en" ? "Try the Oracle" : "开始占卜"}
               </Link>
-              <a href="#learn" className="btn btn-secondary text-lg px-12 py-5 rounded-2xl">
+              <a href="/projects" className="btn btn-secondary text-lg px-12 py-5 rounded-2xl">
                 {lang === "en" ? "Discover More" : "了解更多"}
               </a>
             </motion.div>
